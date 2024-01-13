@@ -20,17 +20,14 @@ release_binary = config.get("release_binary", "main")
 command = config.get("command", "")
 ignore = [item.strip() for item in config.get("ignore", "").split(",")]
 
-'''
-Наконец-то сама функция компиляции. Именно она запускается
-после всех проверок и триггеров
-'''
+# The compilation function
 def compile_handler(command, release_dir, release_binary):
   # Проверяем, запущено ли окно с тем же именем
   for proc in psutil.process_iter(["name"]):
     if proc.info["name"] == release_binary:
       proc.kill()
 
-  # Создаем/очищаем папку release
+  # Create/clear the "release" directory
   if os.path.exists(release_dir):
     for root, dirs, files in os.walk(release_dir):
       for file in files:
@@ -40,16 +37,16 @@ def compile_handler(command, release_dir, release_binary):
   else:
     os.makedirs(release_dir)
 
-  # Осуществляем компиляцию
+  # Compile
   try:
     retcode = subprocess.call(command, shell=True)
     if retcode == 0:
-      print("Компиляция успешно завершена")
+      print("Built successfully")
       subprocess.Popen([os.path.join(release_dir, release_binary)])
     else:
-      print("Произошла ошибка при компиляции")
+      print("Whoops! Something went wrong...")
   except OSError as e:
-    print("Ошибка при вызове g++:", e)
+    print("Error executing compiler", e)
 
 # Detect that one event occurs
 def event_parser(event):  
